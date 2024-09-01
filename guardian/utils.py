@@ -16,6 +16,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Model, QuerySet
 from django.http import HttpResponseForbidden, HttpResponseNotFound
 from django.shortcuts import render
+
 from guardian.conf import settings as guardian_settings
 from guardian.ctypes import get_content_type
 from guardian.exceptions import NotUserNorGroup
@@ -32,6 +33,13 @@ def get_anonymous_user():
     User = get_user_model()
     lookup = {User.USERNAME_FIELD: guardian_settings.ANONYMOUS_USER_NAME}
     return User.objects.get(**lookup)
+
+
+def get_inherited_group(user_or_group):
+    # get multi-table inheritance pointer to auth.Group
+    if hasattr(user_or_group, 'group_ptr'):
+        return user_or_group.group_ptr
+    return user_or_group
 
 
 def get_identity(identity):
@@ -233,6 +241,13 @@ def get_group_obj_perms_model(obj = None):
     from guardian.models import GroupObjectPermissionBase
     GroupObjectPermission = get_obj_perm_model_by_conf('GROUP_OBJ_PERMS_MODEL')
     return get_obj_perms_model(obj, GroupObjectPermissionBase, GroupObjectPermission)
+
+def get_group_model():
+    """
+    Returns model class that it either the auth.Group model from django or the custom
+    group model defined in the settings.
+    """
+    return django_apps.get_model(settings.GUARDIAN_GROUP_MODEL)
 
 
 def evict_obj_perms_cache(obj):

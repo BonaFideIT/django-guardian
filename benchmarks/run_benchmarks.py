@@ -25,7 +25,6 @@ django.setup()
 
 from benchmarks import settings
 from guardian.shortcuts import assign_perm
-from django.core.exceptions import ImproperlyConfigured
 from utils import show_settings
 from django.contrib.auth.models import User, Group
 from django.utils.termcolors import colorize

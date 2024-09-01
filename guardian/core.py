@@ -7,7 +7,7 @@ from django.utils.encoding import force_str
 
 from guardian.conf import settings as guardian_settings
 from guardian.ctypes import get_content_type
-from guardian.utils import get_group_obj_perms_model, get_identity, get_user_obj_perms_model
+from guardian.utils import get_group_obj_perms_model, get_identity, get_user_obj_perms_model, get_inherited_group
 
 
 def _get_pks_model_and_ctype(objects):
@@ -57,7 +57,7 @@ class ObjectPermissionChecker:
         :param user_or_group: should be an ``User``, ``AnonymousUser`` or
           ``Group`` instance
         """
-        self.user, self.group = get_identity(user_or_group)
+        self.user, self.group = get_identity(get_inherited_group(user_or_group))
         self._obj_perms_cache = {}
 
     def has_perm(self, perm, obj):

@@ -11,9 +11,11 @@ from django.contrib.auth.models import AnonymousUser, Group
 
 from guardian.core import ObjectPermissionChecker
 from guardian.exceptions import NotUserNorGroup
+from guardian.utils import get_group_model
 
 register = template.Library()
 
+Group = get_group_model()
 
 class ObjectPermissionsNode(template.Node):
 

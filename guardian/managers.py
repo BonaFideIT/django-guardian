@@ -1,12 +1,14 @@
+import warnings
+
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.db.models import Q
+from django.contrib.auth.models import Permission
+
 from guardian.core import ObjectPermissionChecker
 from guardian.ctypes import get_content_type
 from guardian.exceptions import ObjectNotPersisted
-from django.contrib.auth.models import Permission
-
-import warnings
+from guardian.utils import get_inherited_group
 
 
 class BaseObjectPermissionManager(models.Manager):
@@ -40,7 +42,7 @@ class BaseObjectPermissionManager(models.Manager):
         else:
             permission = perm
 
-        kwargs = {'permission': permission, self.user_or_group_field: user_or_group}
+        kwargs = {'permission': permission, self.user_or_group_field: get_inherited_group(user_or_group)}
         if self.is_generic():
             kwargs['content_type'] = ctype
             kwargs['object_pk'] = obj.pk
@@ -70,7 +72,7 @@ class BaseObjectPermissionManager(models.Manager):
         assigned_perms = []
         for instance in queryset:
             if not checker.has_perm(permission.codename, instance):
-                kwargs = {'permission': permission, self.user_or_group_field: user_or_group}
+                kwargs = {'permission': permission, self.user_or_group_field: get_inherited_group(user_or_group)}
                 if self.is_generic():
                     kwargs['content_type'] = ctype
                     kwargs['object_pk'] = instance.pk
@@ -101,8 +103,8 @@ class BaseObjectPermissionManager(models.Manager):
 
         to_add = []
         field = self.user_or_group_field
-        for user in users_or_groups:
-            kwargs[field] = user
+        for user_or_group in users_or_groups:
+            kwargs[field] = get_inherited_group(user_or_group)
             to_add.append(
                 self.model(**kwargs)
             )
@@ -126,7 +128,7 @@ class BaseObjectPermissionManager(models.Manager):
             raise ObjectNotPersisted("Object %s needs to be persisted first"
                                      % obj)
 
-        filters = Q(**{self.user_or_group_field: user_or_group})
+        filters = Q(**{self.user_or_group_field: get_inherited_group(user_or_group)})
 
         if isinstance(perm, Permission):
             filters &= Q(permission=perm)
@@ -148,7 +150,7 @@ class BaseObjectPermissionManager(models.Manager):
         use ``Queryset.delete`` method for removing it. Main implication of this
         is that ``post_delete`` signals would NOT be fired.
         """
-        filters = Q(**{self.user_or_group_field: user_or_group})
+        filters = Q(**{self.user_or_group_field: get_inherited_group(user_or_group)})
 
         if isinstance(perm, Permission):
             filters &= Q(permission=perm)
