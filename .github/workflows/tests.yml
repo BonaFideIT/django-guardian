@@ -28,7 +28,7 @@ jobs:
           - python-version: "3.9"
             django: main
           - python-version: "3.8"
-            django: 5.0
+            django: "5.0.9"
           - python-version: "3.8"
             django: main
 
