@@ -18,8 +18,6 @@ jobs:
         django: ["3.2.25", "4.1.13", "4.2.16", "5.0.9", "main"]
         exclude:
           - python-version: "3.12"
-            django: "4.2" # Python 3.12 is supported since Django 4.2.8.
-          - python-version: "3.12"
             django: "4.1"
           - python-version: "3.12"
             django: "3.2"
